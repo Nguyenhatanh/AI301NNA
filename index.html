@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phân tích Dữ liệu Kinh doanh</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--navy:#1F4E79;--orange:#E07A1F;--ink:#16263A;--muted:#5A6878;--line:#E5E9F0}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;font-family:'Montserrat',sans-serif;background:#FFFFFF;color:var(--ink)}
+  header{height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 28px;border-bottom:1px solid var(--line);background:#fff}
+  .brand{display:flex;align-items:center;gap:12px;font-weight:800;font-size:18px}
+  .logo{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--navy),#4F7CAC);display:flex;align-items:center;justify-content:center;color:#fff;font-size:17px}
+  .tag{font-size:12px;font-weight:600;color:var(--muted)}
+  a.btn{font-size:13px;font-weight:700;color:var(--navy);text-decoration:none;border:1px solid var(--line);padding:8px 14px;border-radius:8px}
+  a.btn:hover{border-color:var(--navy)}
+  main{position:relative;height:calc(100% - 64px)}
+  iframe{width:100%;height:100%;border:0;display:block}
+  .loading{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#fff;color:var(--muted);font-weight:600;transition:opacity .4s}
+  .spin{width:38px;height:38px;border-radius:50%;border:4px solid #E8EDF3;border-top-color:var(--orange);animation:r 1s linear infinite}
+  @keyframes r{to{transform:rotate(360deg)}}
+  .hint{font-size:12px;font-weight:500;max-width:420px;text-align:center;line-height:1.6}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><div class="logo">📊</div><div>Phân tích Dữ liệu Kinh doanh<div class="tag">Quy trình 8 bước · con người phê duyệt từng bước</div></div></div>
+  <a class="btn" id="open" target="_blank" rel="noopener">Mở toàn màn hình ↗</a>
+</header>
+<main>
+  <div class="loading" id="loading"><div class="spin"></div>Đang khởi động ứng dụng…
+    <div class="hint">Lần truy cập đầu tiên sau một thời gian không dùng, máy chủ cần khoảng 30–60 giây để khởi động.</div></div>
+  <iframe id="app" title="Phân tích Dữ liệu Kinh doanh" allow="clipboard-write"></iframe>
+</main>
+<script>
+  // THAY ĐỊA CHỈ NÀY bằng link ứng dụng Streamlit Cloud của bạn (giữ nguyên ?embed=true ở cuối khi nhúng)
+  const APP_URL = "https://TEN-APP-CUA-BAN.streamlit.app";
+  const frame = document.getElementById("app");
+  frame.src = APP_URL + "/?embed=true&embed_options=light_theme";
+  document.getElementById("open").href = APP_URL;
+  frame.addEventListener("load", () => { const l = document.getElementById("loading"); l.style.opacity = 0; setTimeout(() => l.remove(), 400); });
+</script>
+</body>
+</html>
