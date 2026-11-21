@@ -5,6 +5,7 @@ import datetime as dt
 import os
 
 import matplotlib
+import numpy as np
 from docx import Document
 from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.enum.text import WD_ALIGN_PARAGRAPH
@@ -26,7 +27,8 @@ def _certainty(p: float) -> str:
 
 # ------------------------------------------------------ mô hình nội dung chung
 SECTION_KEYS = {"tomtat": "Tóm tắt điều hành", "dashboard": "Bảng điều khiển theo bộ lọc", "dulieu": "Hiện trạng dữ liệu và làm sạch",
-                "khampha": "Khám phá dữ liệu", "nguyennhan": "Phân tích chuyên sâu và nguyên nhân", "dexuat": "Đề xuất và lộ trình",
+                "khampha": "Khám phá dữ liệu", "nguyennhan": "Phân tích chuyên sâu và nguyên nhân", "bosung": "Phân tích bổ sung theo gợi ý",
+                "dexuat": "Đề xuất và lộ trình",
                 "phuluc": "Phụ lục phương pháp"}
 
 
@@ -165,8 +167,20 @@ def build_blocks(S: dict, include: set | None = None, dash: dict | None = None, 
     import re as _re
     segs = {k: B[a:(marks[i + 1][1] if i + 1 < len(marks) else len(B))] for i, (k, a) in enumerate(marks)}
     out: list[tuple] = []
-    for k in ("tomtat", "dashboard", "dulieu", "khampha", "nguyennhan", "dexuat", "phuluc"):
+    for k in ("tomtat", "dashboard", "dulieu", "khampha", "nguyennhan", "bosung", "dexuat", "phuluc"):
         if k not in include:
+            continue
+        if k == "bosung":
+            ex = S.get("extras") or []
+            if ex:
+                out.append(("h1", "9. Phân tích bổ sung theo gợi ý"))
+                for e in ex:
+                    out += [("h2", e["title"]), ("p", e["note"])]
+                    t = e.get("table")
+                    if t is not None and len(t):
+                        t = t.head(12)
+                        f = lambda v: f"{v:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".") if isinstance(v, (int, float, np.floating, np.integer)) else str(v)  # noqa: E731
+                        out.append(("table", [str(t.index.name or "Nhóm")] + [str(c) for c in t.columns], [[str(i)] + [f(v) for v in r] for i, r in zip(t.index, t.values)]))
             continue
         if k == "dashboard":
             if dash:
@@ -365,7 +379,7 @@ def build_and_validate(S: dict, out_dir: str, include: set | None = None, dash: 
     log.append(f"Gắn kết hình và lời: {n_fig} hình, đều có đoạn dẫn và chú thích" if not reasons else "Gắn kết hình và lời: có hình thiếu diễn giải")
     # 2) Structural completeness
     h1 = [b[1] for b in blocks if b[0] == "h1"]
-    want = len([k for k in include if k not in ("phuluc",) and (k != "dashboard" or dash)])
+    want = len([k for k in include if k not in ("phuluc",) and (k != "dashboard" or dash) and (k != "bosung" or S.get("extras"))])
     got = sum(1 for h in h1 if h[:1].isdigit())
     if got < want:
         reasons.append(f"Thiếu {want - got} phần đã chọn")

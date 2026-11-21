@@ -11,6 +11,17 @@ import plotly.graph_objects as go
 
 NAVY, ORANGE, GREY, RED, GREEN, AMBER = "#1F4E79", "#E07A1F", "#9AA5B1", "#C0392B", "#2E7D32", "#B7791F"
 FONT = "Montserrat, sans-serif"
+DARK = False
+
+
+def _rgba(h: str, a: float) -> str:
+    return f"rgba({int(h[1:3], 16)},{int(h[3:5], 16)},{int(h[5:7], 16)},{a})"
+
+
+def set_palette(primary: str, accent: str, dark: bool) -> None:
+    """Đồng bộ màu biểu đồ với chủ đề giao diện đang chọn."""
+    global NAVY, ORANGE, DARK
+    NAVY, ORANGE, DARK = primary, accent, dark
 
 
 # ============================================================ TẦNG I: TÍNH TOÁN
@@ -130,22 +141,22 @@ def money_axis(fig: go.Figure, vmax: float, axis: str = "y") -> go.Figure:
 
 def _layout(fig: go.Figure, title: str, h: int = 380) -> go.Figure:
     fig.update_layout(
-        title=dict(text=f"<b>{title}</b>", font=dict(family=FONT, size=16, color="#16263A"), x=0, xanchor="left"),
-        font=dict(family=FONT, size=13, color="#2B3A4A"), template="plotly_white", height=h,
+        title=dict(text=f"<b>{title}</b>", font=dict(family=FONT, size=16, color="#E5E9F0" if DARK else "#16263A"), x=0, xanchor="left"),
+        font=dict(family=FONT, size=13, color="#E5E9F0" if DARK else "#2B3A4A"), template="plotly_dark" if DARK else "plotly_white", height=h,
         margin=dict(l=10, r=10, t=56, b=10), separators=",.",
-        hoverlabel=dict(bgcolor="white", bordercolor=NAVY, font=dict(family=FONT, size=13)),
+        hoverlabel=dict(bgcolor="#111A2E" if DARK else "white", bordercolor=NAVY, font=dict(family=FONT, size=13, color="#E5E9F0" if DARK else "#1F2D3D")),
         transition=dict(duration=600, easing="cubic-in-out"), showlegend=False,
-        paper_bgcolor="white", plot_bgcolor="white",
+        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
     )
-    fig.update_xaxes(showgrid=False, linecolor="#D5DDE6")
-    fig.update_yaxes(gridcolor="#EEF1F5", zeroline=False)
+    fig.update_xaxes(showgrid=False, linecolor="#334155" if DARK else "#D5DDE6")
+    fig.update_yaxes(gridcolor="#1E293B" if DARK else "#EEF1F5", zeroline=False)
     return fig
 
 
 def fig_trend(m: pd.DataFrame, kpi_label: str) -> go.Figure:
     fig = go.Figure(go.Scatter(
         x=m.index, y=m["Doanh số"], mode="lines+markers", fill="tozeroy", line=dict(color=NAVY, width=3, shape="spline"),
-        fillcolor="rgba(31,78,121,0.10)", marker=dict(size=7, color=NAVY), customdata=np.stack([m["Số đơn"], m["Giá trị TB/đơn"], m["Tăng trưởng tháng (%)"].fillna(0)], axis=-1),
+        fillcolor=_rgba(NAVY, .12), marker=dict(size=7, color=NAVY), customdata=np.stack([m["Số đơn"], m["Giá trị TB/đơn"], m["Tăng trưởng tháng (%)"].fillna(0)], axis=-1),
         hovertemplate="<b>Tháng %{x}</b><br>Doanh số: %{y:,.0f}<br>Số đơn: %{customdata[0]:,.0f}<br>Giá trị TB/đơn: %{customdata[1]:,.0f}<br>So với tháng trước: %{customdata[2]:+.1f}%<extra></extra>"))
     fig.update_yaxes(rangemode="tozero")
     money_axis(fig, float(m["Doanh số"].max()), "y")
